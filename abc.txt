@@ -1,1 +1,119 @@
-hello this is my text file
+ANT To Gradle Migration.
+Why ANT To Gradle Migration?
+Because:
+a)We need to use apaas.then we need to convert it to gradle.Only gradle is supported to apaas.
+Step-1:First run application with ANT
+     a)If ANT is configured on your machine
+     example:ant name_of_target
+     b)If ANT is not configured in your local machine
+     then run ANT script using gradle and create build.gradle parrallel to build.xml with following code
+     ant.importBuild 'build.xml'
+	 example:gradle name_of_target.
+Why step-1?
+Because :
+a)application should run their existing build tool,then only we can proceed.
+b)We need to comapare ant generated artifacts to gradle generated artifacts.
+
+Step-2:Restructure the folder structure to standard java application structure(if already not)
+      Standard java application structure.
+      src	  
+	     ->main->java(all java src file with proper group id)
+		       ->webapp(all content of Webcontent folder for example jsp files ,WEB-INF )
+			   ->resources (all propeties file related to src)
+		 ->test ->java(all java test file with proper group id)
+		        ->webapp (its not require )
+				->resources(all propeties file related to test)
+		a)If application is war type
+		i)Put src(containing main and test folder) folder in root folder
+		then create build.gradle parrallel to src folder.
+		
+		b)If application is ear type
+		i)Create war folder and put src(containing main and test folder) folder inside it
+		then create build.gradle parrallel to src folder.
+		ii)create src folder parrallel to war folder for generating ear and build.gradle for ear
+		iii)in src folderr of ear please create standard structure src->main->application->META-INF->put application.xml and similar things.
+		iv)create settings.gradle in root folder and include war (folder) module in setting.gradle.
+Why step-2?
+Because :
+a)If we will use standard structure then there is no need to define some custom task in build.gradle(exp- copying resources folder content to war content).
+Step-3:Creatin of build.gradle 
+      a)for war module:
+	   i)apply plugin war or apply from http://mca.intranet.barclays.co.uk/gradle1/war.gradle
+	   ii)define sourceset 
+	   sourceSets {
+       main {
+        java { srcDir 'war/src/main/java' }
+        resources { srcDir 'war/src/main/resources' }
+         }
+        test {
+        java { srcDir 'war/src/test/java' }
+		resources { srcDir 'war/src/test/resources' }
+       }
+       }
+	   iii) define repository section from where we need to download dependecy:
+	   repositories {
+        maven {
+        url "https://barcorpnexus.barcapint.com:8443/nexus/content/groups/barcorp/"
+       }
+       }
+	   iv)define dependency section:what dependency we need to put in war or what dependency require to compile the application
+	   dependencies {
+       compile group: 'org.aspectj', name: 'aspectjweaver', version: '1.6.8'
+	   }
+	   v)define war task:(if we want to rename war name and want to excludes some extra jars.
+	   war {
+       archiveName  "MIService.war"
+       rootSpec.exclude("aopalliance-*.jar")
+	   }
+	   vi)define test task:for ignoring test failures
+	   test {
+       ignoreFailures true
+      }
+      b)for ear module:
+	  i)apply plugin ear or apply from http://mca.intranet.barclays.co.uk/gradle1/eps-ear.gradle
+	  ii)define allproject section to override mca specific gradle files:Inthese file we are specifying project specific 
+	  nexus repository and version,please create a gradle folder and put custom files inside it and put gradle arraper as well. 
+	  allprojects {
+	 apply from: "${rootDir}/gradle/nexuscustom.gradle"
+	 apply from: "${rootDir}/gradle/version.gradle"
+	  }
+	  iii)define project group ID exp:
+      group 'com.barclays.ivr'
+	  iv)Define ear task:(what things we need to include in war and some manifest details:
+	  ear {
+     archiveName  "TRT-MIService.ear"
+      from('war/build/libs') {
+		include "appinfo.jar"
+	}
+
+    manifest {
+        attributes 'Built-By':'Barclays Bank Plc'
+        attributes 'Implementation-Vendor':'Channels - IVR Team'
+        attributes 'Implementation-Version':project.version
+    }
+    }
+Why step-3?
+Because :
+a)for running any gradle command its require build.gradle.
+Step-4:adding and finding dependency in  build.gradle
+     a)for this please go to war/ear and check lib folder what jars are available.
+     for each jar please open it in 7zip/beyondcompare and find groupid,artifactid,version or you can find it google also.
+     and add it to build.gradle.
+     b)please check jar is available in barcorp with same version:
+	 https://barcorpnexus.barcapint.com:8443/nexus/content/repositories/barcorp/
+	 if not we need to upload it into application specific release repo.
+	 
+Why step-4?	
+Because:
+a)because now we are not picking the jars from WEB-INF folder(src folder) ,we are downloading  from nexus.	
+	 ==============================================
+   Maven to gradle migration:
+----------------------------
+1. download code from svn or Git
+2. build the code using maven and keep aside the final artifact
+3. go to dir where u r pom file exists and trigger gradle init command it will convert nad create basic skelton
+4. do this for every module if it is multi module project
+5. syncup with generated build.gradle file and pom files
+6. add any missing depedencies 
+7. start building gradle build file
+8. once it is done compare with maven generated arifact it should be same
