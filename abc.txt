@@ -117,3 +117,189 @@ a)because now we are not picking the jars from WEB-INF folder(src folder) ,we ar
 6. add any missing depedencies 
 7. start building gradle build file
 8. once it is done compare with maven generated arifact it should be same
+===================================================
+              Jenkins Issues and Solution
+
+
+1) Pushing version to text file for using it in another job.
+
+Issue faced: When the mvn help: evaluate get executed first time on any cluster it downloads new maven dependencies which cause the wrong entries in version.txt file.
+
+Root cause:  grep regular expression currently used (grep -v "^\[" ) is not ignoring the Downloading and Downloaded part from command; which cause the Download and Downloading part also get added in version.txt, and finally causes the nolio deployment job failure.
+
+Solution: Use the grep -Ev '(^\[|Download\w+:)’ expression to get the proper output in version.txt every time.
+
+2) While Running Shell script and Windows batch command.
+
+Issue faced: When running shell script/windows batch command we get error. For example
+cd ${WORKSPACE}, cd %WORKSPACE% respectively for shell script and windows batch command.
+Root cause: For running shell script and windows batch command we use slave WINDOWS and LINUX (RHEL etc.).
+Solution: Use appropriate build step Execute shell and Execute windows batch command according to Jenkins Executors.
+
+3) Could not transfer artifact to given nexus repository.
+
+Issue faced: When we will try to upload same version artifacts to nexus release repository, it will throw error.
+Solution: We cannot redeploy same version in release repository, it should be different every time.
+
+4) Could not find some third party artifact
+
+Issue faced: When we try to build and upload the artifact in Nexus but unable to find the third party artifact.
+Solution: We need to manually upload those artifacts.
+
+5) Proper naming convention for onboarding Jenkins and onboarding nexus jobs.
+
+Solution: The Job name should have proper naming convention.
+For example :- FxTradeAdapter 
+pcb.wealth.FxTradeAdapter
+
+6) Changes in pom.xml -: 
+
+(a) Changes required in pom.xml file
+
+Issue faced: Could not transfer the artifacts to nexus when version is hard coded in pom to RELEASE build type.
+Root cause: We cannot re deploy same version artifact to Nexus Release repository.
+Solution: We have to make it dynamically in pom.
+Eg: Replace <version>${version.number} </version> instead of <version>1.0.2</version>
+
+(b) Change the local nexus URL to central in <distributionManagement> tag
+
+<distributionManagement>
+  <repository>
+   	<id>Repo Id</id>
+    	<name>Repo Id_RELEASE</name>
+ 	<url>Repo Url for Release</url>
+  </repository>
+  <snapshotRepository>
+  	<id> Repo Id </id>
+    	<name>Repo Id_SNAPSHOT</name>
+<url> Repo Url for SNAPSHOT </url>
+  </snapshotRepository>
+</distributionManagement>
+
+Eg: For pcb.wealth.fx_Trade_Adapter
+
+SNAPSHOT:
+Repo Id - pcb.wealth.fx_Trade_Adapter
+Repo Id_SNAPSHOT - pcb.wealth.fx_Trade_Adapter_ SNAPSHOT
+Repo URL for SNAPSHOT- https://barcorpnexus.barcapint.com:8443/nexus/content/repositories/pcb.wealth.fx_Trade_Adapter_SNAPSHOT
+
+RELEASE:
+Repo Id - pcb.wealth.fx_Trade_Adapter
+Repo Id_RELEASE - pcb.wealth.fx_Trade_Adapter_RELEASE
+Repo URL for RELEASE- https://barcorpnexus.barcapint.com:8443/nexus/content/repositories/pcb.wealth.fx_Trade_Adapter_RELEASE
+
+
+
+
+(c) For maven release plugin, add plugin tag and scm tag as mentioned below-
+
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-release-plugin</artifactId>
+<version>2.2.1</version>
+<configuration>			
+<tagBase>-Repo Url -</tagBase>
+</configuration>
+</plugin>
+
+
+<scm>
+<connection>scm:svn: Repo URL </connection>
+<developerConnection>scm:svn: Repo URL</developerConnection>
+<url>Repo URL </url>
+</scm>
+
+7) Give proper values of parameters while configuring jobs
+
+Issue faced: The space was left in one of the value because of which it was not matching the values of the parameters in conditional build step
+Solution: there should not be any space.
+Eg: 	Build Type=SNAPSHOT
+Build Type= SNAPSHOT  (with space)
+
+8) Description should be proper while we are configuring Jenkins job
+
+Issue faced: It will predict wrong and the error will generate.
+Solution: You should describe it properly in configuration step.
+
+9) Points to be noted while configuring Maven Release plugin-
+
+	Maven release plugin tag should be there.
+	SCM tag should be there
+	Version type should be SNAPSHOT
+	Build job and deploy job should get run on same Jenkins executor (RHEL*)
+	Preselect 'Specify SCM login/password' checkbox in job configuration and provide credentials while doing perform maven release.
+	Try Dry Run before running actual release.
+
+10) SonarQube integration in Jenkins
+
+Issue faced: SonarQube 4.5.2 – PRODUCTION was to be integrated in Jenkins Windows job. While executing job, error related to windows .net 4.x version was displayed in the Jenkins log.
+Solution: SonarQube 4.5.2 – PRODUCTION is compatible with Jenkins slave W2K8R2-0734.
+1.	Make sure archive workspace option has been enabled in build job.
+
+ 
+
+2.	Create a new Jenkins job for SonarQube integration.
+3.	Select W2K8R2-0734 as Jenkins slave and use build jobs workspace (clone workspace option) under SCM.
+ 
+4.	Invoke SonarQube
+
+ =====================
+                                         PBTV SVN to GIT migration:
+
+Step1:
+   Download the svn-migration-scripts.jar and place in the folder and verify
+                    java -jar svn-migration-scripts.jar verify
+Verify the scripts to make sure you have the Java Runtime Environment, Git, Subversion, and the git-svn utility installed.
+Step2:
+     java -jar svn-migration-scripts.jar authors <svn url> g01098791 Password01 > authors.txt
+        SVN only records the username of the author for each revision. Git, however, stores the full name and email address of the author. This means that you need to create a text file that maps SVN usernames to their Git counterparts.
+Eg: Java –jar svn-migration-scripts authors  http://svng.barcapint.com/SVG/repos/BWINTEGRATION/edh/pbtv/service/3.2/service  sidanapr password > authors.txt
+Step3:
+git svn clone --stdlayout --authors-file=authors.txt <url> <git repository name>
+     The git svn clone command transforms the trunk, branches and tags in your SVN repository into a new Git repository.
+Eg: git svn  clone –stdlayout –authors-file=authors.txt http://svng.barcapint.com/SVG/repos/BWINTEGRATION/edh/pbtv/service/3.2/service  PBTV
+If you face any issue like “<author name> not defined in authors.txt file” execute the below command to get all list of authors in svn.
+svn log -q | grep -e '^r' | awk 'BEGIN { FS = "|" } ; { print $2 }' | sort | uniq
+Update the authors file and execute the step 3 command again.
+
+Step4: Once the migration is done successfully, convert the SVN tags and branches to local Git tags and branches
+1. git branch -r -->First check the remote branches with this command
+2. git branch -a -->gives all remote as well as local
+3. Convert branches 
+git branch -r | grep -v tags | sed -rne 's, *([^@]+)$,\1,p' | \
+ while read branch; \
+ do echo "git branch $branch $branch"; \
+done | sh
+
+3. For converting SVN  TAGS  to GIT tags
+for tag in `git branch -r | grep "tags/" | sed 's/ tags\///'`; do
+git branch $tag refs/remotes/$tag
+done
+
+Step 5:  Compare the naming conventions of git and svn branches. If any difference rename the branches.
+Renaming  branch :
+git branch –m < old branch name> <new branch name>
+Eg: git branch –m origin/14.3 14.3
+Delete branch
+git branch –D <branch name>
+git branch  -D origin/trunk
+
+Step 6: To remove binaries
+git filter-branch --prune-empty --index-filter 'git rm -rf --cached --ignore-unmatch *.jar *.exe *.zip *.tar *.gz *.pdb *.msi *.dll' --tag-name-filter cat -- --all
+
+Step 7: git remote add origin <Git URL>
+Step 8: git push –u origin –all
+
+
+
+If the master is not pushed , or incase of errors
+
+   git push origin master –f
+
+Step 9: To push tags
+         git push –tags
+
+
+====================
+
+
