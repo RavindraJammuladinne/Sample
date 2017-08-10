@@ -1,0 +1,39 @@
+1.	Clean
+2.	Retrieve (from Github)
+3.	Build
+4.	Deploy (to a chosen non-prod environment) 
+5.	Unit test (junit) --> http://karma-runner.github.io/0.8/plus/Jenkins-CI.html
+6.	Functional test (Selenium)
+7.	Metrics (Sonar or other code quality tool)
+========
+Sometimes npm's cache gets confused. You can reset it using: -> npm cache clean
+
+npm config set http-proxy http://10.97.231.29:80
+npm config set https-proxy http://10.97.231.29:80
+npm install
+npm run build:aot
+
+xcopy ITSSCBuild D:\Apache24\htdocs\ITSSCBuild\ /y
+xcopy ITSSCBuild\dist D:\Apache24\htdocs\ITSSCBuild\dist\ /y
+xcopy ITSSCBuild\resources\css\fonts D:\Apache24\htdocs\ITSSCBuild\resources\css\fonts\ /y
+xcopy ITSSCBuild\resources\css\lib D:\Apache24\htdocs\ITSSCBuild\resources\css\lib\ /y
+xcopy ITSSCBuild\resources\images D:\Apache24\htdocs\ITSSCBuild\resources\images\ /y 
+
+
+
+xcopy FileSaver.min.js D:\Apache24\htdocs\ITSSCBuild\ /y
+xcopy index.html D:\Apache24\htdocs\ITSSCBuild\ /y
+xcopy jszip.min.js D:\Apache24\htdocs\ITSSCBuild\ /y
+xcopy shim.min.js D:\Apache24\htdocs\ITSSCBuild\ /y
+xcopy styles.css D:\Apache24\htdocs\ITSSCBuild\ /y 
+xcopy zone.min.js D:\Apache24\htdocs\ITSSCBuild\ /y
+xcopy aot\dist\build.js D:\Apache24\htdocs\ITSSCBuild\dist\ /y
+xcopy resources\css\fonts D:\Apache24\htdocs\ITSSCBuild\resources\css\fonts\ /y
+xcopy resources\css\lib D:\Apache24\htdocs\ITSSCBuild\resources\css\lib\ /y
+xcopy resources\images D:\Apache24\htdocs\ITSSCBuild\resources\images\ /y 
+
+========
+jmeter integration with jenkins
+grunt 
+gulp
+

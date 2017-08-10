@@ -1,0 +1,21 @@
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\ASMT_HRCHY\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\dbo\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\ECC\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\EntityProfiling\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\IAM\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\PNS\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\RiskEvents\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\RiskRating\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\TRMC\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\TroIntake\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\griddb\TTMS\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\gridrpt\dbo\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\gridrpt\GEARDASHBOARD\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\gridrpt\ITRISKSCORECARD\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\gridrpt\TRODASHBOARD\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\gridrpt\TVMWFLW\Stored_Procedures"
+@RD /S /Q "D:\GRID\GIT\QA\grid\GRID_legacy\ddl\gridrpt\USAGEDASHBOARD\Stored_Procedures"
+
+pause
+
+REM @RD /S /Q "D:\PHP_Projects\testproject\Release\testfolder"

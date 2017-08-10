@@ -1,0 +1,10 @@
+The following exception occurred. Check log for details. 
+com.ibm.websphere.management.application.client.AppDeploymentException: [Root exception is java.lang.OutOfMemoryError: Java heap space]
+
+
+Global deployment settings
+Use this page to manage settings that apply to all applications. NOTE: some settings may only apply to a subset of application types.
+
+[Exception in:/secure/layouts/tabsLayout.jsp] null
+
+Caused by: java.io.IOException: There is not enough space on the disk.
