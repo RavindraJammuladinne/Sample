@@ -1,0 +1,29 @@
+PFB the step to install Apache HTTP Server.
+Note: We will be switching from IBM HTTP Server (IHS) to Apache HTTP Server (64 bit). 
+
+Pre-requisite:
+
+Be sure that you have installed the latest C++ Redistributable Visual Studio 2015 
+Download location: vc_redist_x64/86.exe.
+
+Apache HTTP Server (64 bit) – Direct Download 
+
+https://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip
+
+Steps to install
+
+1.	Install Visual Studio C++ Redistributable 2015 – 64 bit (You might already have this)
+2.	Extract httpd-2.4.25-win64-VC14.zip in C drive  (C:\Apache24)
+Some of you might not have access to C drive. In that case, you can extract anywhere but we have to make few changes in C:\Apache24\conf\httpd.conf file
+Open httpd.conf file using any text editor and search for all the occurrences of c: and update it with the new path  
+3.	<Directory "c:/Apache24/htdocs">   - By default all html files are stored here (Similar to Tomcat Webapp folder). You can override the path to any location.  
+4.	Next step is to install Apache service. To do this, open cmd prompt (Run as administrator) and navigate to C:\Apache24\bin and type http.exe -k install
+5.	Run ApacheMonitor.exe from the path C:\Apache24\bin\ApacheMonitor.exe (Run as administrator). This will create a new icon in status bar next to data time (Bottom right corner)
+6.	Right click the icon and open Apache Monitor. This will open the following screen
+ 
+7.	Click Start to start the server
+ 
+8.	Via browser hit the URL: http://localhost (http://localhost:80) Default port no., is 80 so it is not necessary to add 80.
+ 
+If you were able see the above screen then you have installed the server successfully.
+
