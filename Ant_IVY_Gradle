@@ -1,0 +1,27 @@
+- Run gradle init at parent level
+- define all common configurations in parent build and settings files
+- If you have modules repeat gradle init cmd and generate build and setting files and then modify accordingly.
+- If you are using ant+ivy then convert all ivy dependences by executing this task
+
+build.gradle:
+
+	task convertIvyDeps << {
+    def ivyXml = new XmlParser().parse(new File("ivy.xml"))
+
+    println "dependencies {"
+    ivyXml.dependencies.dependency.each {
+        def scope = it.@conf?.contains("test") ? "testCompile" : "compile"
+        println("\t$scope \"${it.@org}:${it.@name}:${it.@rev}\"")
+    }
+    println "}"
+}
+
+run : gradle convertIvyDeps
+
+the above cmd will generate all dependences that has been defined in ivy file.
+
+- copy all dependencies section and paste in build.gradle file
+
+- Modify the version as per requirements (make sure the repositories section should be defined with your remote repo URL's)
+
+- Try to execute by running gradle build
