@@ -244,7 +244,7 @@ Solution: SonarQube 4.5.2 – PRODUCTION is compatible with Jenkins slave W2K8R2
 4.	Invoke SonarQube
 
  =====================
-                                         PBTV SVN to GIT migration:
+                                         SVN to GIT migration:
 
 Step1:
    Download the svn-migration-scripts.jar and place in the folder and verify
