@@ -38,7 +38,7 @@ Because :
 a)If we will use standard structure then there is no need to define some custom task in build.gradle(exp- copying resources folder content to war content).
 Step-3:Creatin of build.gradle 
       a)for war module:
-	   i)apply plugin war or apply from http://mca.intranet.barclays.co.uk/gradle1/war.gradle
+	   i)apply plugin war or apply from http://XXXX/gradle1/war.gradle
 	   ii)define sourceset 
 	   sourceSets {
        main {
@@ -53,7 +53,7 @@ Step-3:Creatin of build.gradle
 	   iii) define repository section from where we need to download dependecy:
 	   repositories {
         maven {
-        url "https://barcorpnexus.barcapint.com:8443/nexus/content/groups/barcorp/"
+        url "https://XXX:8443/nexus/content/groups/abc/"
        }
        }
 	   iv)define dependency section:what dependency we need to put in war or what dependency require to compile the application
@@ -62,7 +62,7 @@ Step-3:Creatin of build.gradle
 	   }
 	   v)define war task:(if we want to rename war name and want to excludes some extra jars.
 	   war {
-       archiveName  "MIService.war"
+       archiveName  "abc.war"
        rootSpec.exclude("aopalliance-*.jar")
 	   }
 	   vi)define test task:for ignoring test failures
@@ -70,7 +70,7 @@ Step-3:Creatin of build.gradle
        ignoreFailures true
       }
       b)for ear module:
-	  i)apply plugin ear or apply from http://mca.intranet.barclays.co.uk/gradle1/eps-ear.gradle
+	  i)apply plugin ear or apply from http://xxxx/gradle1/eps-ear.gradle
 	  ii)define allproject section to override mca specific gradle files:Inthese file we are specifying project specific 
 	  nexus repository and version,please create a gradle folder and put custom files inside it and put gradle arraper as well. 
 	  allprojects {
@@ -78,17 +78,17 @@ Step-3:Creatin of build.gradle
 	 apply from: "${rootDir}/gradle/version.gradle"
 	  }
 	  iii)define project group ID exp:
-      group 'com.barclays.ivr'
+      group 'com.abc.xyz'
 	  iv)Define ear task:(what things we need to include in war and some manifest details:
 	  ear {
-     archiveName  "TRT-MIService.ear"
+     archiveName  "xyz.ear"
       from('war/build/libs') {
 		include "appinfo.jar"
 	}
 
     manifest {
-        attributes 'Built-By':'Barclays Bank Plc'
-        attributes 'Implementation-Vendor':'Channels - IVR Team'
+        attributes 'Built-By':'xyz'
+        attributes 'Implementation-Vendor':'Channels - abc Team'
         attributes 'Implementation-Version':project.version
     }
     }
@@ -100,7 +100,7 @@ Step-4:adding and finding dependency in  build.gradle
      for each jar please open it in 7zip/beyondcompare and find groupid,artifactid,version or you can find it google also.
      and add it to build.gradle.
      b)please check jar is available in barcorp with same version:
-	 https://barcorpnexus.barcapint.com:8443/nexus/content/repositories/barcorp/
+	 https://xxx:8443/nexus/content/repositories/
 	 if not we need to upload it into application specific release repo.
 	 
 Why step-4?	
@@ -176,17 +176,17 @@ Eg: Replace <version>${version.number} </version> instead of <version>1.0.2</ver
   </snapshotRepository>
 </distributionManagement>
 
-Eg: For pcb.wealth.fx_Trade_Adapter
+
 
 SNAPSHOT:
-Repo Id - pcb.wealth.fx_Trade_Adapter
-Repo Id_SNAPSHOT - pcb.wealth.fx_Trade_Adapter_ SNAPSHOT
-Repo URL for SNAPSHOT- https://barcorpnexus.barcapint.com:8443/nexus/content/repositories/pcb.wealth.fx_Trade_Adapter_SNAPSHOT
+Repo Id - abc
+Repo Id_SNAPSHOT - abc_ SNAPSHOT
+Repo URL for SNAPSHOT- https://xxx:8443/nexus/content/repositories/abc_SNAPSHOT
 
 RELEASE:
-Repo Id - pcb.wealth.fx_Trade_Adapter
-Repo Id_RELEASE - pcb.wealth.fx_Trade_Adapter_RELEASE
-Repo URL for RELEASE- https://barcorpnexus.barcapint.com:8443/nexus/content/repositories/pcb.wealth.fx_Trade_Adapter_RELEASE
+Repo Id - abc
+Repo Id_RELEASE - abc_RELEASE
+Repo URL for RELEASE- https://xxx:8443/nexus/content/repositories/abc_RELEASE
 
 
 
@@ -253,11 +253,11 @@ Verify the scripts to make sure you have the Java Runtime Environment, Git, Subv
 Step2:
      java -jar svn-migration-scripts.jar authors <svn url> g01098791 Password01 > authors.txt
         SVN only records the username of the author for each revision. Git, however, stores the full name and email address of the author. This means that you need to create a text file that maps SVN usernames to their Git counterparts.
-Eg: Java –jar svn-migration-scripts authors  http://svng.barcapint.com/SVG/repos/BWINTEGRATION/edh/pbtv/service/3.2/service  sidanapr password > authors.txt
+Eg: Java –jar svn-migration-scripts authors  http://svnrepo/SVN/repos/abc  <uname> <password> > authors.txt
 Step3:
 git svn clone --stdlayout --authors-file=authors.txt <url> <git repository name>
      The git svn clone command transforms the trunk, branches and tags in your SVN repository into a new Git repository.
-Eg: git svn  clone –stdlayout –authors-file=authors.txt http://svng.barcapint.com/SVG/repos/BWINTEGRATION/edh/pbtv/service/3.2/service  PBTV
+Eg: git svn  clone –stdlayout –authors-file=authors.txt http://svnrepo/SVN/repos/abc
 If you face any issue like “<author name> not defined in authors.txt file” execute the below command to get all list of authors in svn.
 svn log -q | grep -e '^r' | awk 'BEGIN { FS = "|" } ; { print $2 }' | sort | uniq
 Update the authors file and execute the step 3 command again.
