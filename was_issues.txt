@@ -8,3 +8,143 @@ Use this page to manage settings that apply to all applications. NOTE: some sett
 [Exception in:/secure/layouts/tabsLayout.jsp] null
 
 Caused by: java.io.IOException: There is not enough space on the disk.
+
+
+_==========
+#!/bin/sh
+source /home/oretail/.profile
+
+VAR=`cat /home/oretail/deploy_list.txt`
+echo "var:$VAR"
+echo "line:"
+log_file_name=output_`date +%Y-%m-%d`.log
+log_time=_`date +%X`
+if [ -f "$log_file_name" ]; then
+ `mv $log_file_name "$log_file_name$log_time"`
+fi
+while IFS= read -r line; do
+    echo "Line: $line"
+    file_name=${line%~*}
+    echo "file_name:$file_name"
+    schema=${line#*~}
+    echo "schema:$schema"
+    if [ "$schema" == "RMS" ];then
+	   con_string="{{ rms_schema }}"
+	   else
+  		con_string="{{ intr_schema }}"
+    fi
+    echo $file_name
+    echo $con_string
+    echo "sqlplus $con_string << EOF >> $log_file_name"
+sqlplus $con_string << EOF >> $log_file_name
+@{{ Staging }}/$file_name;
+commit;
+exit;
+EOF
+RETVAL=`grep -E "unknown command|unable to open file|ERROR at|ORA-*|*error*" $log_file_name | wc -l`
+if [ $RETVAL -gt 0 ];then
+echo "1st SQLPLUS FAILED : $RETVAL"
+   exit 1
+fi 	
+done <<< "$VAR"
+==================
+#!/bin/sh
+
+rm -f dbobjects.txt batches.txt forms.txt templates.txt
+for i in `cat release.txt`
+do
+	#file=`echo $i | cut -d '.' -f1`
+	ext=`echo $i | cut -d '.' -f2`
+	file_ext=`echo $ext | tr '[:upper:]' '[:lower:]'` 
+	if [ $file_ext == 'sql' ] || [ $file_ext == 'pkb' ] || [ $file_ext == 'pks' ] || [ $file_ext == 'pls' ] || [ $file_ext == 'plb' ];then
+		includefile=`echo $i|awk -F"/" '{print $NF}'`
+		echo $includefile >> dbobjects.txt
+		elif [ $file_ext == 'pc' ] || [ $file_ext == 'mk' ];then
+			includefile=`echo $i`
+			echo $includefile >> batches.txt
+			elif [ $file_ext == 'sh' ] || [ $file_ext == 'ksh' ];then
+				includefile=`echo $i`
+				echo $includefile >> batches.txt
+				elif [ $file_ext == 'fmb' ] ||[ $file_ext == 'mmb' ] || [ $file_ext == 'pll' ];then
+					includefile=`echo $i`
+					echo $includefile >> forms.txt
+					else
+						[ $file_ext == 'csv' ] ||[ $file_ext == 'xlsx' ] || [ $file_ext == 'ods' ]
+						includefile=`echo $i`
+						echo $includefile >> templates.txt
+				
+	fi
+done
+
+
+ear-deploy:
+vars:
+---
+# vars file for oracle
+username: ""
+password: ""
+adminUrl: "t3://{{ host_name }}:{{ port }}"
+deploymentName: ""
+deploymentFile: ""
+mdsFile: "MDSConfig.py"
+fileLocation: "/home/{{ appuser }}/deployEAR"
+#wlstHome: "/u01/app/weblogic/Oracle/Middleware/oracle_common/common/bin"
+oracleBase: "/u01/app/{{ appuser }}/Oracle/Middleware"
+domainHome: "/u01/app/{{ appuser }}/Oracle/Middleware/user_projects/domains"
+domainName: "{{ domainHome }}/{{ domain_name }}"
+deploymentTarget: "{{ cluster_name }}"
+#deployDirectory: "{{ domainName }}/servers/{{ server_name }}/stage"
+repository: " "
+partition: ""
+jndi: ""
+---------------
+mdsconfig.j2:
+import re
+
+
+archive = getMDSArchiveConfig(fromLocation="{{ fileLocation }}/{{ deploymentFile }}")
+
+archive.setAppMetadataRepository(repository="{{ repository }}",partition="{{ partition }}",jndi="{{ jndi }}")
+archive.save()
+--------
+deploy.j2:https://github.com/playniuniu/ansible-weblogic-deploy
+-----
+task:
+---
+- name: Create config/fileLocation directory
+  file: dest={{ fileLocation }} mode=755 state=directory
+  register: filedir
+
+- name: Copy MDS config file to deployEAR directory
+  template: src=MDSConfig.j2 dest={{ fileLocation }}/MDSConfig.py mode=755
+  when: filedir is success
+  register: copypyscript
+  tags: abc
+  
+- name: download ear package and put it in deployEAR directory
+  command: wget -O {{ artifactID }}-{{ version }}.{{ classifier }} http://nexus:8081/nexus/service/local/artifact/maven/redirect?r={{ repositoryID }}\&g={{ groupID }}\&a={{ artifactID }}\&v={{ version }}\&p={{ classifier }}
+  args:
+    chdir: /home/{{ appuser }}/deployEAR
+
+- name: Update adf-config.xml file with MDS entries
+  shell: "{{ oracleBase }}/oracle_common/common/bin/wlst.sh {{ fileLocation }}/MDSConfig.py"
+  when: copypyscript is success
+- name: Change directory 
+  shell: "{{ item }}"
+  with_items:
+            - sh setDomainEnv.sh
+  args: 
+    chdir: "{{ domainName }}/bin"
+
+- name: Copy deploy script
+  template: src=deploy.j2 dest={{ fileLocation }}/deploy.py mode=755
+  when: filedir is success
+  register: copyscript
+
+- name: Run deploy command
+  shell: "{{ oracleBase }}/oracle_common/common/bin/wlst.sh {{ fileLocation }}/deploy.py"
+  when: copyscript is success
+  register: deployout
+  failed_when: "'Error' in deployout.stdout"
+- debug: var=deployout.stdout_lines
+---------
